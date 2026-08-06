@@ -176,7 +176,7 @@
     @apply max-w-7xl px-5 mx-auto w-full;
   }
   .container {
-    @apply pt-[94px] pb-18 min-h-screen;
+    @apply pt-16 pb-18 ;
   }
   .navItem {
     @apply px-1 sm:px-3 text-sm sm:text-base font-medium flex items-center cursor-pointer text-[var(--text-primary)];
@@ -534,7 +534,7 @@
     list-style: none;
   }
   .library-step-number {
-    @apply w-8 h-8 min-w-8 min-h-8 rounded-full bg-[#fff6e5] border border-[var(--text-primary)] text-[var(--text-primary)] flex items-center justify-center font-semibold text-sm;
+    @apply w-8 h-8 min-w-8 min-h-8 rounded-full bg-[#fff6e5] border  text-[var(--text-primary)] flex items-center justify-center font-semibold text-sm shadow-xs;
   }
   .library-step-title {
     @apply font-semibold text-base text-[#222c37] leading-6;

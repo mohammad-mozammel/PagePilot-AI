@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Serif, Mona_Sans } from "next/font/google";
+import { IBM_Plex_Serif, Inter, Merriweather, Mona_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import "./globals.css";
 import Navbar from "@/components/Navbar"
@@ -16,6 +17,25 @@ const monaSans = Mona_Sans({
   subsets: ["latin"],
 });
 
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-body",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const merriweather = Merriweather({
+  variable: "--font-book",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "PagePilot AI",
   description: "PagePilot AI helps you read, understand, and remember more. Upload PDFs, chat with AI, generate summaries, and explore books through voice-powered conversations."
@@ -25,8 +45,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en">
-      <body className={`${ibmPlexSerif.variable} ${monaSans.variable} relative antialiased`}>{children}</body>
-      <Navbar />
+      <body className={`${ibmPlexSerif.variable} ${monaSans.variable} ${plusJakarta.variable} ${inter.variable} ${merriweather.variable} relative antialiased`}>
+        <ClerkProvider>
+          <Navbar />
+          {children}
+        </ClerkProvider>
+      </body>
     </html>
   );
 }
