@@ -24,7 +24,12 @@ import {
   MAX_IMAGE_SIZE,
   ACCEPTED_IMAGE_TYPES,
 } from '@/lib/constants'
-import { cn } from '@/lib/utils'
+import { cn, parsePDFFile } from '@/lib/utils'
+import { useAuth } from '@clerk/nextjs'
+import { toast } from 'sonner'
+import { checkBookExists, createBook, saveBookSegments } from '@/lib/actions/book.actions'
+import { useRouter } from 'next/navigation'
+import { upload } from '@vercel/blob/client'
 
 const formSchema = z.object({
   pdfFile: z
@@ -54,27 +59,25 @@ const formSchema = z.object({
     ),
   title: z
     .string()
-    .trim()
-    .min(2, 'Title must be at least 2 characters')
-    .max(200, 'Title must be less than 200 characters'),
+    .min(1, 'Title must be at least 1 characters')
+    .max(100, 'Title must be less than 100 characters'),
   author: z
     .string()
-    .trim()
-    .min(2, 'Author name must be at least 2 characters')
+    .min(1, 'Author name must be at least 1 characters')
     .max(100, 'Author name must be less than 100 characters'),
-  voice: z.enum(['dave', 'daniel', 'chris', 'rachel', 'sarah'], {
+  persona: z.enum(['dave', 'daniel', 'chris', 'rachel', 'sarah'], {
     message: 'Please select a valid voice',
   }),
 })
 
-type VoiceKey = 'dave' | 'daniel' | 'chris' | 'rachel' | 'sarah'
+type VoiceKey = 'dave' | 'daniel' | 'chris' | 'rachel' | 'sarah' | ''
 
 interface FormValues {
-  pdfFile: File | null
+  pdfFile: File | null | undefined
   coverImage: File | null
   title: string
   author: string
-  voice: VoiceKey
+  persona: VoiceKey
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -226,14 +229,17 @@ const UploadForm = () => {
   const pdfInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
 
+  const { userId } = useAuth()
+  const router = useRouter()
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
-      pdfFile: null,
-      coverImage: null,
       title: '',
       author: '',
-      voice: DEFAULT_VOICE as VoiceKey,
+      persona: '',
+      pdfFile: undefined,
+      coverImage: undefined,
     },
     mode: 'onTouched',
   })
@@ -277,13 +283,113 @@ const UploadForm = () => {
     })
   }, [form])
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
+    if (!userId) {
+      return toast.error('Please login to upload book')
+    }
+
     setIsSubmitting(true)
+
+    // PostHog -> Track Book Upload
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-      console.log('Form submitted:', values)
+      const existsCheck = await checkBookExists(data.title)
+
+      if (existsCheck.exists && existsCheck.book) {
+        toast.info('book with same title alrady exisis');
+        form.reset()
+        router.push(`/book/${existsCheck.book.slug}`)
+        return;
+      }
+
+      const fileTitle = data.title.replace(/\s+/g, '_').toLowerCase();
+      const pdfFileData = data.pdfFile;
+
+      if (!pdfFileData) {
+        toast.error('Please upload a PDF file');
+        return;
+      }
+
+      const parsedPDF = await parsePDFFile(pdfFileData);
+
+      if (parsedPDF.content.length === 0) {
+        toast.error("Failed to parse PDF. Please try again with a different file.");
+        return;
+      }
+
+      const uploadedPdfBlob = await upload(fileTitle, pdfFileData, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+        contentType: 'application/pdf'
+      });
+
+      let coverUrl: string;
+
+      if (data.coverImage) {
+        const coverFile = data.coverImage;
+
+        const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+          contentType: coverFile.type
+        });
+
+        coverUrl = uploadedCoverBlob.url;
+
+      } else {
+        const response = await fetch(parsedPDF.cover)
+        const blob = await response.blob();
+
+        const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, blob, {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+          contentType: 'image/png'
+        })
+
+        coverUrl = uploadedCoverBlob.url;
+      }
+
+      const book = await createBook({
+        clerkId: userId,
+        title: data.title,
+        author: data.author,
+        persona: data.persona,
+        fileURL: uploadedPdfBlob.url,
+        fileBlobKey: uploadedPdfBlob.pathname,
+        coverURL: coverUrl,
+        fileSize: pdfFileData.size
+      })
+
+      if (!book.success) throw new Error('Failed to create book');
+
+      if (book.alreadyExists) {
+        toast.info('book with same title alrady exisis');
+        form.reset()
+        router.push(`/book/${existsCheck.book.slug}`)
+        return;
+      }
+
+      const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content);
+
+      if (!segments.success) {
+        toast.error("Failed to save book segments");
+        throw new Error("Failed to save book segments");
+      }
+
+      form.reset();
+      router.push(`/`)
+
+
+
+      // await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      // console.log('Form submitted:', values)
+
     } catch (error) {
       console.error('Submission error:', error)
+
+      toast.error('Failed to upload book. Please try again later.')
+
     } finally {
       setIsSubmitting(false)
     }
@@ -295,7 +401,7 @@ const UploadForm = () => {
       <FormField
         key={voiceKey}
         control={form.control}
-        name="voice"
+        name="persona"
         render={({ field }) => {
           const isSelected = field.value === voiceKey
           return (
