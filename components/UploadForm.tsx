@@ -232,6 +232,8 @@ const UploadForm = () => {
   const { userId } = useAuth()
   const router = useRouter()
 
+
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
@@ -320,7 +322,8 @@ const UploadForm = () => {
       const uploadedPdfBlob = await upload(fileTitle, pdfFileData, {
         access: 'public',
         handleUploadUrl: '/api/upload',
-        contentType: 'application/pdf'
+        contentType: 'application/pdf',
+        clientPayload: JSON.stringify({ userId })
       });
 
       let coverUrl: string;
@@ -331,7 +334,8 @@ const UploadForm = () => {
         const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
           access: 'public',
           handleUploadUrl: '/api/upload',
-          contentType: coverFile.type
+          contentType: coverFile.type,
+          clientPayload: JSON.stringify({ userId })
         });
 
         coverUrl = uploadedCoverBlob.url;
@@ -343,7 +347,8 @@ const UploadForm = () => {
         const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, blob, {
           access: 'public',
           handleUploadUrl: '/api/upload',
-          contentType: 'image/png'
+          contentType: 'image/png',
+          clientPayload: JSON.stringify({ userId })
         })
 
         coverUrl = uploadedCoverBlob.url;

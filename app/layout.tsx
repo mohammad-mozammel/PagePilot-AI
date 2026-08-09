@@ -44,15 +44,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en">
-      <body className={`${ibmPlexSerif.variable} ${monaSans.variable} ${plusJakarta.variable} ${inter.variable} ${merriweather.variable} relative antialiased`}>
-        <ClerkProvider>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${ibmPlexSerif.variable} ${monaSans.variable} ${plusJakarta.variable} ${inter.variable} ${merriweather.variable} relative antialiased`}
+        >
           <Navbar />
+
           {children}
-          <Toaster/>
-        </ClerkProvider>
-      </body>
-    </html>
+
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
