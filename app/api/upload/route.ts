@@ -11,19 +11,8 @@ export async function POST(request: Request): Promise<NextResponse> {
             token: process.env.BLOB_READ_WRITE_TOKEN,
             body,
             request,
-            onBeforeGenerateToken: async (_pathname, clientPayload) => {
-                const { userId: sessionUserId } = await auth();
-
-                let payloadUserId: string | undefined;
-                if (clientPayload) {
-                    try {
-                        payloadUserId = (JSON.parse(clientPayload) as { userId?: string }).userId;
-                    } catch {
-                        payloadUserId = undefined;
-                    }
-                }
-
-                const userId = sessionUserId ?? payloadUserId;
+            onBeforeGenerateToken: async () => {
+                const { userId } = await auth();
 
                 if(!userId) {
                     throw new Error('Unauthorized: User not authenticated');

@@ -322,8 +322,7 @@ const UploadForm = () => {
       const uploadedPdfBlob = await upload(fileTitle, pdfFileData, {
         access: 'public',
         handleUploadUrl: '/api/upload',
-        contentType: 'application/pdf',
-        clientPayload: JSON.stringify({ userId })
+        contentType: 'application/pdf'
       });
 
       let coverUrl: string;
@@ -334,8 +333,7 @@ const UploadForm = () => {
         const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
           access: 'public',
           handleUploadUrl: '/api/upload',
-          contentType: coverFile.type,
-          clientPayload: JSON.stringify({ userId })
+          contentType: coverFile.type
         });
 
         coverUrl = uploadedCoverBlob.url;
@@ -347,8 +345,7 @@ const UploadForm = () => {
         const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, blob, {
           access: 'public',
           handleUploadUrl: '/api/upload',
-          contentType: 'image/png',
-          clientPayload: JSON.stringify({ userId })
+          contentType: 'image/png'
         })
 
         coverUrl = uploadedCoverBlob.url;
