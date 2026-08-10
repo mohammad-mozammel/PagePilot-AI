@@ -176,7 +176,7 @@
     @apply max-w-7xl px-5 mx-auto w-full;
   }
   .container {
-    @apply pt-16 pb-18 ;
+    @apply pt-12 pb-18 ;
   }
   .navItem {
     @apply px-1 sm:px-3 text-sm sm:text-base font-medium flex items-center cursor-pointer text-[var(--text-primary)];

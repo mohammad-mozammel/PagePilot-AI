@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {NextResponse} from "next/server";
 import {handleUpload, HandleUploadBody} from "@vercel/blob/client";
 import {auth} from "@clerk/nextjs/server";

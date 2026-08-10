@@ -19,8 +19,6 @@ const BookSchema = new Schema<IBook>({
 }, { timestamps: true })
 
 
-const Book = models.book || model<IBook>('Book', BookSchema)
-
-// const Book = models.book || model('Book', BookSchema)
+const Book = models.Book || model<IBook>('Book', BookSchema)
 
 export default Book

@@ -14,6 +14,6 @@ const VoiceSessionSchema = new Schema<IVoiceSession>({
 VoiceSessionSchema.index({ clerkId: 1, billingPeriodStart: 1 })
 
 
-const VoiceSession = models.voiceSession || model<IVoiceSession>('VoiceSession', VoiceSessionSchema)
+const VoiceSession = models.VoiceSession || model<IVoiceSession>('VoiceSession', VoiceSessionSchema)
 
 export default VoiceSession
