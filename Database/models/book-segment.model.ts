@@ -14,6 +14,6 @@ const BookSegmentSchema = new Schema<IBookSegment>({
 BookSegmentSchema.index({ bookId: 1, segmentIndex: 1 }, { unique: true })
 
 
-const BookSegment = models.bookSegment || model<IBookSegment>('BookSegment', BookSegmentSchema)
+const BookSegment = models.BookSegment || model<IBookSegment>('BookSegment', BookSegmentSchema)
 
 export default BookSegment

@@ -10,7 +10,7 @@ const BookCard = ({ title, author, coverURL, slug, coverColor }: BookCardProps) 
 
     return (
         <Link
-            href={`/book/${slug}`}
+            href={`/books/${slug}`}
             className="book-card group block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#663820] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f8f4e9] rounded-[14px]"
             aria-label={`Open ${title} by ${author}`}
         >
