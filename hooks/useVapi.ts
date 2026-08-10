@@ -268,8 +268,10 @@ export function useVapi(book: IBook) {
             });
         } catch (err) {
             console.error('Failed to start call:', err);
-            setStatus('idle');
-            setLimitError('Failed to start voice session. Please try again.');
+            if (sessionIdRef.current) {
+                endVoiceSession(sessionIdRef.current, 0).catch((err) => console.error('Failed to end voice session on error:', err),)
+                sessionIdRef.current = null
+            }
         }
     }, [book._id, book.title, book.author, voice, userId]);
 
