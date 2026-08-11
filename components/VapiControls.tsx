@@ -8,7 +8,7 @@ import Transcript from "./Transcript";
 
 const VapiControls = ({ book }: { book: IBook }) => {
 
-    const { status, isActive, messages, currentMessage, currentUserMessage, duration, start, stop, clearError, limitError, } = useVapi(book)
+   const { status, isActive, messages, currentMessage, currentUserMessage, duration, start, stop, clearError, limitError,  } = useVapi(book)
 
     const { title, author, coverURL, persona } = book;
 
