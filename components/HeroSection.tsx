@@ -36,26 +36,14 @@ export default function HeroSection() {
             </Link>
           </div>
 
-          {/* Center — vintage books illustration (mobile) */}
+          {/* Center — vintage books illustration */}
           <div className="library-hero-illustration">
             <Image
               src="/assets/hero-illustration.png"
               alt="Vintage books, globe, and reading lamp"
               width={420}
               height={220}
-              className="h-auto w-full `max-w-[340px]` object-contain"
-              priority
-            />
-          </div>
-
-          {/* Center — vintage books illustration (desktop) */}
-          <div className="library-hero-illustration-desktop">
-            <Image
-              src="/assets/hero-illustration.png"
-              alt="Vintage books, globe, and reading lamp"
-              width={420}
-              height={220}
-              className="h-auto w-full `max-w-[400px]` object-contain"
+              className="h-auto w-full max-w-[340px] lg:max-w-[400px] object-contain"
               priority
             />
           </div>

@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: 'https',
@@ -9,7 +10,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'xre0b3beuotbfimr.public.blob.vercel-storage.com',
+        hostname: '*.public.blob.vercel-storage.com',
       },
     ]
   }

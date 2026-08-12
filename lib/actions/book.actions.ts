@@ -6,6 +6,9 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/Database/mongoose";
 import Book from "@/Database/models/book.model";
 import BookSegment from "@/Database/models/book-segment.model";
+import { auth } from "@clerk/nextjs/server";
+import { getUserPlan } from "@/lib/subscription";
+import { getPlanLimits } from "@/lib/subscription-constants";
 
 export const getAllBooks = async (search?: string) => {
     try {
@@ -24,7 +27,7 @@ export const getAllBooks = async (search?: string) => {
             };
         }
 
-        const books = await Book.find(query).sort({ createdAt: -1 }).lean();
+        const books = await Book.find(query).sort({ createdAt: -1 }).limit(100).lean();
 
         return {
             success: true,
@@ -68,6 +71,12 @@ export const createBook = async (data: CreateBook) => {
     try {
         await connectToDatabase();
 
+        const { userId } = await auth();
+
+        if (!userId) {
+            return { success: false, error: 'Please sign in to upload a book' };
+        }
+
         const slug = generateSlug(data.title);
 
         const existingBook = await Book.findOne({slug}).lean();
@@ -80,34 +89,19 @@ export const createBook = async (data: CreateBook) => {
             }
         }
 
-        // // Todo: Check subscription limits before creating a book
-        // const { getUserPlan } = await import("@/lib/subscription.server");
-        // const { PLAN_LIMITS } = await import("@/lib/subscription-constants");
+        const plan = await getUserPlan();
+        const planLimits = getPlanLimits(plan);
+        const bookCount = await Book.countDocuments({ clerkId: userId });
 
-        // const { auth } = await import("@clerk/nextjs/server");
-        // const { userId } = await auth();
+        if (bookCount >= planLimits.books) {
+            return {
+                success: false,
+                error: `You've reached the ${planLimits.books}-book limit on the ${plan} plan. Upgrade to unlock more books.`,
+                isBillingError: true,
+            }
+        }
 
-        // if (!userId || userId !== data.clerkId) {
-        //     return { success: false, error: "Unauthorized" };
-        // }
-
-        // const plan = await getUserPlan();
-        // const limits = PLAN_LIMITS[plan];
-
-        // const bookCount = await Book.countDocuments({ clerkId: userId });
-
-        // if (bookCount >= limits.maxBooks) {
-        //     const { revalidatePath } = await import("next/cache");
-        //     revalidatePath("/");
-
-        //     return {
-        //         success: false,
-        //         error: `You have reached the maximum number of books allowed for your ${plan} plan (${limits.maxBooks}). Please upgrade to add more books.`,
-        //         isBillingError: true,
-        //     };
-        // }
-
-        const book = await Book.create({...data, slug, totalSegments: 0});
+        const book = await Book.create({...data, clerkId: userId, slug, totalSegments: 0});
 
         return {
             success: true,
@@ -145,21 +139,23 @@ export const getBookBySlug = async (slug: string) => {
     }
 }
 
-export const saveBookSegments = async (bookId: string, clerkId: string, segments: TextSegment[]) => {
+export const saveBookSegments = async (bookId: string, _clerkId: string, segments: TextSegment[]) => {
     try {
+        const { userId } = await auth();
+
+        if (!userId) {
+            return { success: false, error: 'Please sign in to upload a book' };
+        }
+
         await connectToDatabase();
 
-        console.log('Saving book segments...');
-
         const segmentsToInsert = segments.map(({ text, segmentIndex, pageNumber, wordCount }) => ({
-            clerkId, bookId, content: text, segmentIndex, pageNumber, wordCount
+            clerkId: userId, bookId, content: text, segmentIndex, pageNumber, wordCount
         }));
 
         await BookSegment.insertMany(segmentsToInsert);
 
         await Book.findByIdAndUpdate(bookId, { totalSegments: segments.length });
-
-        console.log('Book segments saved successfully.');
 
         return {
             success: true,
@@ -179,8 +175,6 @@ export const saveBookSegments = async (bookId: string, clerkId: string, segments
 export const searchBookSegments = async (bookId: string, query: string, limit: number = 5) => {
     try {
         await connectToDatabase();
-
-        console.log(`Searching for: "${query}" in book ${bookId}`);
 
         const bookObjectId = new mongoose.Types.ObjectId(bookId);
 
@@ -214,8 +208,6 @@ export const searchBookSegments = async (bookId: string, query: string, limit: n
                 .limit(limit)
                 .lean();
         }
-
-        console.log(`Search complete. Found ${segments.length} results`);
 
         return {
             success: true,

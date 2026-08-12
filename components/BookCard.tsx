@@ -1,3 +1,4 @@
+'use client'
 
 import Link from 'next/link'
 import { BookCardProps } from '@/types'
@@ -30,12 +31,12 @@ const BookCard = ({ title, author, coverURL, slug, coverColor }: BookCardProps) 
                             className="book-card-cover"
                             sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 20vw"
                             loading="lazy"
-                            // onError={(e) => {
-                            //     const target = e.currentTarget as HTMLImageElement
-                            //     if (target.src !== fallbackSrc) {
-                            //         target.src = fallbackSrc
-                            //     }
-                            // }}
+                            onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                if (!target.src.endsWith(fallbackSrc)) {
+                                    target.src = fallbackSrc
+                                }
+                            }}
                         />
 
                         <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" aria-hidden="true" />

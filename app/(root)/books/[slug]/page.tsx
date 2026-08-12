@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { ArrowLeft, Mic, MicOff } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getBookBySlug } from "@/lib/actions/book.actions";
 import VapiControls from "@/components/VapiControls";
 

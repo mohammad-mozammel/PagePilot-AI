@@ -18,7 +18,6 @@ import LoadingOverlay from '@/components/LoadingOverlay'
 import {
   voiceOptions,
   voiceCategories,
-  DEFAULT_VOICE,
   MAX_FILE_SIZE,
   ACCEPTED_PDF_TYPES,
   MAX_IMAGE_SIZE,
@@ -45,8 +44,9 @@ const formSchema = z.object({
     ),
   coverImage: z
     .custom<File | null>()
+    .optional()
     .refine(
-      (file) => file === null || file instanceof File,
+      (file) => !file || file instanceof File,
       'Please upload a valid image file'
     )
     .refine(
@@ -74,7 +74,7 @@ type VoiceKey = 'dave' | 'daniel' | 'chris' | 'rachel' | 'sarah' | ''
 
 interface FormValues {
   pdfFile: File | null | undefined
-  coverImage: File | null
+  coverImage: File | null | undefined
   title: string
   author: string
   persona: VoiceKey
@@ -226,6 +226,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
 
 const UploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0)
   const pdfInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
 
@@ -291,16 +292,15 @@ const UploadForm = () => {
     }
 
     setIsSubmitting(true)
-
-    // PostHog -> Track Book Upload
+    setCurrentStep(1)
 
     try {
       const existsCheck = await checkBookExists(data.title)
 
       if (existsCheck.exists && existsCheck.book) {
-        toast.info('book with same title alrady exisis');
+        toast.info('A book with this title already exists');
         form.reset()
-        router.push(`/book/${existsCheck.book.slug}`)
+        router.push(`/books/${existsCheck.book.slug}`)
         return;
       }
 
@@ -319,6 +319,8 @@ const UploadForm = () => {
         return;
       }
 
+      setCurrentStep(0)
+
       const uploadedPdfBlob = await upload(fileTitle, pdfFileData, {
         access: 'public',
         handleUploadUrl: '/api/upload',
@@ -326,17 +328,19 @@ const UploadForm = () => {
       });
 
       let coverUrl: string;
+      let coverBlobKey: string | undefined;
 
       if (data.coverImage) {
         const coverFile = data.coverImage;
 
-        const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
+        const uploadedCoverBlob = await upload(`${fileTitle}_cover`, coverFile, {
           access: 'public',
           handleUploadUrl: '/api/upload',
           contentType: coverFile.type
         });
 
         coverUrl = uploadedCoverBlob.url;
+        coverBlobKey = uploadedCoverBlob.pathname;
 
       } else {
         const response = await fetch(parsedPDF.cover)
@@ -349,7 +353,10 @@ const UploadForm = () => {
         })
 
         coverUrl = uploadedCoverBlob.url;
+        coverBlobKey = uploadedCoverBlob.pathname;
       }
+
+      setCurrentStep(2)
 
       const book = await createBook({
         clerkId: userId,
@@ -359,17 +366,33 @@ const UploadForm = () => {
         fileURL: uploadedPdfBlob.url,
         fileBlobKey: uploadedPdfBlob.pathname,
         coverURL: coverUrl,
+        coverBlobKey,
         fileSize: pdfFileData.size
       })
 
-      if (!book.success) throw new Error('Failed to create book');
+      if (!book.success) {
+        const message = typeof book.error === 'string' ? book.error : 'Failed to create book'
+        if (book.isBillingError) {
+          toast.error(message, {
+            action: {
+              label: 'Upgrade',
+              onClick: () => router.push('/subscriptions'),
+            },
+          })
+        } else {
+          toast.error(message)
+        }
+        throw new Error('Failed to create book');
+      }
 
-      if (book.alreadyExists) {
-        toast.info('book with same title alrady exisis');
+      if (book.alreadyExists && book.data) {
+        toast.info('A book with this title already exists');
         form.reset()
-        router.push(`/book/${existsCheck.book.slug}`)
+        router.push(`/books/${book.data.slug}`)
         return;
       }
+
+      setCurrentStep(3)
 
       const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content);
 
@@ -379,13 +402,8 @@ const UploadForm = () => {
       }
 
       form.reset();
-      router.push(`/`)
-
-
-
-      // await new Promise((resolve) => setTimeout(resolve, 3000))
-
-      // console.log('Form submitted:', values)
+      toast.success('Book uploaded successfully!');
+      router.push(`/books/${book.data.slug}`)
 
     } catch (error) {
       console.error('Submission error:', error)
@@ -463,7 +481,7 @@ const UploadForm = () => {
 
   return (
     <>
-      <LoadingOverlay isLoading={isSubmitting} title="Synthesizing your book..." />
+      <LoadingOverlay isLoading={isSubmitting} title="Synthesizing your book..." currentStep={currentStep} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

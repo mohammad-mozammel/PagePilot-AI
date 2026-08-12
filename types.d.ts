@@ -1,9 +1,5 @@
 import { Document, Types } from 'mongoose';
-import { ReactNode } from 'react';
-import { Control, FieldPath, FieldValues } from 'react-hook-form';
-import { LucideIcon } from 'lucide-react';
-import z from 'zod';
-import { UploadSchema } from '@/lib/zod';
+import { PlanType } from "@/lib/subscription-constants";
 
 // ============================================
 // DATABASE MODELS
@@ -53,8 +49,6 @@ export interface IVoiceSession extends Document {
 // FORM & INPUT TYPES
 // ============================================
 
-export type BookUploadFormValues = z.infer<typeof UploadSchema>;
-
 export interface CreateBook {
     clerkId: string;
     title: string;
@@ -87,42 +81,9 @@ export interface Messages {
     content: string;
 }
 
-export interface ShadowBoxProps {
-    children: ReactNode;
-    className?: string;
-}
-
-export interface VoiceSelectorProps {
-    disabled?: boolean;
-    className?: string;
-    value?: string;
-    onChange: (voiceId: string) => void;
-}
-
-export interface InputFieldProps<T extends FieldValues> {
-    control: Control<T>;
-    name: FieldPath<T>;
-    label: string;
-    placeholder?: string;
-    disabled?: boolean;
-}
-
-export interface FileUploadFieldProps<T extends FieldValues> {
-    control: Control<T>;
-    name: FieldPath<T>;
-    label: string;
-    acceptTypes: string[];
-    disabled?: boolean;
-    icon: LucideIcon;
-    placeholder: string;
-    hint: string;
-}
-
-
-
-
-
-import {PLANS, PlanType} from "@/lib/subscription-constants";
+// ============================================
+// SESSION & BILLING TYPES
+// ============================================
 
 export interface SessionCheckResult {
     allowed: boolean;
