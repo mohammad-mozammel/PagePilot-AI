@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Upload, Image as ImageIcon, X, FileText, GripVertical } from 'lucide-react'
+import Image from 'next/image'
+import { Upload, Image as ImageIcon, X, FileText, GripVertical, Volume2 } from 'lucide-react'
 import {
   Form,
   FormControl,
@@ -92,11 +93,13 @@ interface DropzoneProps {
   onFileSelect: (file: File) => void
   onFileRemove: () => void
   accept: string
-  icon: React.ReactNode
-  uploadedIcon: React.ReactNode
-  emptyText: string
-  emptyHint: string
+  icon?: React.ReactNode
+  uploadedIcon?: React.ReactNode
+  emptyText?: string
+  emptyHint?: string
   uploadedHint?: string
+  className?: string
+  render?: (ctx: { file: File | null | undefined; isDragOver: boolean }) => React.ReactNode
 }
 
 const Dropzone: React.FC<DropzoneProps> = ({
@@ -107,9 +110,11 @@ const Dropzone: React.FC<DropzoneProps> = ({
   accept,
   icon,
   uploadedIcon,
-  emptyText,
-  emptyHint,
+  emptyText = '',
+  emptyHint = '',
   uploadedHint = 'Click to change file',
+  className,
+  render,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false)
 
@@ -173,21 +178,27 @@ const Dropzone: React.FC<DropzoneProps> = ({
         tabIndex={0}
         aria-label={file ? `${uploadedHint}: ${file.name}` : emptyText}
         className={cn(
-          'upload-dropzone border-2 border-dashed outline-none transition-all duration-200',
-          file ? 'upload-dropzone-uploaded border-[#663820]/50' : 'border-[#8B7355]/40',
-          isDragOver &&
-          'scale-[1.01] border-[#663820] bg-[#fff6e5] shadow-soft-md',
-          !file && !isDragOver && 'focus-visible:border-[#663820] focus-visible:ring-2 focus-visible:ring-[#663820]/20'
+          'outline-none transition-all duration-200',
+          className
+            ? cn(className, isDragOver && 'border-[#7A2E2C]')
+            : cn(
+              'upload-dropzone border-2 border-dashed',
+              file ? 'upload-dropzone-uploaded border-[#7A2E2C]/50' : 'border-[#B08D4F]/40',
+              isDragOver && 'scale-[1.01] border-[#7A2E2C] bg-[#FFFDF8] shadow-soft-md',
+              !file && !isDragOver && 'focus-visible:border-[#7A2E2C] focus-visible:ring-2 focus-visible:ring-[#7A2E2C]/20'
+            )
         )}
       >
-        {file ? (
+        {render ? (
+          render({ file, isDragOver })
+        ) : file ? (
           <div className="flex flex-col items-center gap-2">
             {uploadedIcon}
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-full px-2">
               <span className="upload-dropzone-text font-semibold truncate max-w-[220px] sm:max-w-xs">
                 {file.name}
               </span>
-              <span className="text-xs font-medium text-[#8B7355] bg-white/60 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-medium text-[#B08D4F] bg-white/60 px-2 py-0.5 rounded-md">
                 {formatFileSize(file.size)}
               </span>
               <span
@@ -209,7 +220,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
         ) : (
           <>
             {isDragOver ? (
-              <GripVertical className="upload-dropzone-icon animate-bounce text-[#663820]" />
+              <GripVertical className="upload-dropzone-icon animate-bounce text-[#7A2E2C]" />
             ) : (
               icon
             )}
@@ -249,6 +260,22 @@ const UploadForm = () => {
 
   const pdfFile = useWatch({ control: form.control, name: 'pdfFile' })
   const coverImage = useWatch({ control: form.control, name: 'coverImage' })
+  const watchedTitle = useWatch({ control: form.control, name: 'title' })
+  const watchedAuthor = useWatch({ control: form.control, name: 'author' })
+  const watchedPersona = useWatch({ control: form.control, name: 'persona' })
+
+  const coverPreviewUrl = useMemo(() => {
+    if (coverImage instanceof File) {
+      return URL.createObjectURL(coverImage)
+    }
+    return null
+  }, [coverImage])
+
+  useEffect(() => {
+    return () => {
+      if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+    }
+  }, [coverPreviewUrl])
 
   const handlePdfSelect = useCallback(
     (file: File) => {
@@ -428,7 +455,7 @@ const UploadForm = () => {
             <label
               className={cn(
                 'voice-selector-option flex-col sm:flex-col sm:items-start sm:justify-start text-left cursor-pointer select-none',
-                isSelected && 'voice-selector-option-selected ring-1 ring-[#663820]/30',
+                isSelected && 'voice-selector-option-selected ring-1 ring-[#7A2E2C]/30',
                 !isSelected && 'voice-selector-option-default'
               )}
             >
@@ -447,18 +474,18 @@ const UploadForm = () => {
                   className={cn(
                     'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-150 shrink-0',
                     isSelected
-                      ? 'border-[#663820] bg-[#663820]/5'
+                      ? 'border-[#7A2E2C] bg-[#7A2E2C]/5'
                       : 'border-gray-300 bg-white'
                   )}
                 >
                   {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-[#663820] animate-in zoom-in-50 duration-150" />
+                    <span className="w-2 h-2 rounded-full bg-[#7A2E2C] animate-in zoom-in-50 duration-150" />
                   )}
                 </span>
                 <span
                   className={cn(
                     'font-semibold text-base',
-                    isSelected ? 'text-[#663820]' : 'text-[#212a3b]'
+                    isSelected ? 'text-[#7A2E2C]' : 'text-[#1C1A17]'
                   )}
                 >
                   {voice.name}
@@ -467,7 +494,7 @@ const UploadForm = () => {
               <span
                 className={cn(
                   'text-xs sm:text-sm pl-6 sm:pl-0 leading-snug',
-                  isSelected ? 'text-[#8B7355]' : 'text-[#3d485e]'
+                  isSelected ? 'text-[#B08D4F]' : 'text-[#4A443B]'
                 )}
               >
                 {voice.description}
@@ -485,144 +512,209 @@ const UploadForm = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="new-book-wrapper space-y-8"
+          className="newbook-layout"
           noValidate
         >
-          <FormField
-            control={form.control}
-            name="pdfFile"
-            render={() => (
-              <FormItem>
-                <FormLabel className="form-label">Upload Book PDF</FormLabel>
-                <FormControl>
-                  <Dropzone
-                    inputRef={pdfInputRef}
-                    file={pdfFile}
-                    onFileSelect={handlePdfSelect}
-                    onFileRemove={handlePdfRemove}
-                    accept=".pdf,application/pdf"
-                    icon={<Upload className="upload-dropzone-icon" />}
-                    uploadedIcon={<FileText className="upload-dropzone-icon" />}
-                    emptyText="Click or drag PDF here"
-                    emptyHint="PDF file (max 50MB)"
-                    uploadedHint="Click to change, or drop a new file"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Live preview — the cover itself doubles as the cover-image dropzone */}
+          <aside className="newbook-sidebar">
+            <FormField
+              control={form.control}
+              name="coverImage"
+              render={() => (
+                <FormItem>
+                  <FormControl>
+                    <Dropzone
+                      inputRef={coverInputRef}
+                      file={coverImage ?? null}
+                      onFileSelect={handleCoverSelect}
+                      onFileRemove={handleCoverRemove}
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      className={cn('newbook-preview-cover', coverPreviewUrl && 'newbook-preview-cover-filled')}
+                      render={() =>
+                        coverPreviewUrl ? (
+                          <>
+                            <Image
+                              src={coverPreviewUrl}
+                              alt="Cover preview"
+                              fill
+                              unoptimized
+                              className="object-cover"
+                            />
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              aria-label="Remove cover image"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCoverRemove()
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.stopPropagation()
+                                  e.preventDefault()
+                                  handleCoverRemove()
+                                }
+                              }}
+                              className="newbook-preview-remove"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="w-7 h-7 text-[#B08D4F]" />
+                            <span className="text-xs text-[#6B6355] px-4 leading-snug">
+                              {pdfFile ? 'Auto-generated from your PDF — or add your own' : 'Click to add a cover'}
+                            </span>
+                          </>
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="coverImage"
-            render={() => (
-              <FormItem>
-                <FormLabel className="form-label">Upload Book Cover Image</FormLabel>
-                <FormControl>
-                  <Dropzone
-                    inputRef={coverInputRef}
-                    file={coverImage ?? null}
-                    onFileSelect={handleCoverSelect}
-                    onFileRemove={handleCoverRemove}
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
-                    icon={<ImageIcon className="upload-dropzone-icon" />}
-                    uploadedIcon={<ImageIcon className="upload-dropzone-icon" />}
-                    emptyText="Click or drag image here"
-                    emptyHint="Leave empty to auto-generate from PDF"
-                    uploadedHint="Click to change, or drop a new image"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <p className="newbook-preview-title">{watchedTitle || 'Untitled book'}</p>
+            {watchedAuthor && <p className="newbook-preview-author">{watchedAuthor}</p>}
 
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="form-label">Title</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="ex: Rich Dad Poor Dad"
-                    className="form-input"
-                    autoComplete="off"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="author"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="form-label">Author Name</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="ex: Robert Kiyosaki"
-                    className="form-input"
-                    autoComplete="off"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormItem>
-            <FormLabel className="form-label">Choose Assistant Voice</FormLabel>
-            <FormControl>
-              <div className="space-y-6">
-                <div>
-                  <p className="text-base font-medium text-[#3d485e] mb-3 flex items-center gap-2">
-                    <span className="inline-block w-1 h-1 rounded-full bg-[#663820]" />
-                    Male Voices
-                  </p>
-                  <div className="voice-selector-options flex flex-col sm:flex-row">
-                    {voiceCategories.male.map((vk) =>
-                      renderVoiceOption(vk as VoiceKey)
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-base font-medium text-[#3d485e] mb-3 flex items-center gap-2">
-                    <span className="inline-block w-1 h-1 rounded-full bg-[#663820]" />
-                    Female Voices
-                  </p>
-                  <div className="voice-selector-options flex flex-col sm:flex-row">
-                    {voiceCategories.female.map((vk) =>
-                      renderVoiceOption(vk as VoiceKey)
-                    )}
-                  </div>
-                </div>
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-
-          <button
-            type="submit"
-            className="form-btn disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.99]"
-            disabled={isSubmitting || form.formState.isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                Synthesizing...
+            {watchedPersona && voiceOptions[watchedPersona as keyof typeof voiceOptions] && (
+              <span className="newbook-preview-voice">
+                <Volume2 className="w-3 h-3" />
+                {voiceOptions[watchedPersona as keyof typeof voiceOptions].name}
               </span>
-            ) : (
-              'Begin Synthesis'
             )}
-          </button>
+          </aside>
+
+          {/* Form sections */}
+          <div className="flex flex-col gap-8">
+            <div className="form-section">
+              <div className="form-section-header">
+                <span className="form-section-number">01</span>
+                <span className="form-section-title">Upload your book</span>
+              </div>
+              <FormField
+                control={form.control}
+                name="pdfFile"
+                render={() => (
+                  <FormItem>
+                    <FormControl>
+                      <Dropzone
+                        inputRef={pdfInputRef}
+                        file={pdfFile}
+                        onFileSelect={handlePdfSelect}
+                        onFileRemove={handlePdfRemove}
+                        accept=".pdf,application/pdf"
+                        icon={<Upload className="upload-dropzone-icon" />}
+                        uploadedIcon={<FileText className="upload-dropzone-icon" />}
+                        emptyText="Click or drag PDF here"
+                        emptyHint="PDF file (max 50MB)"
+                        uploadedHint="Click to change, or drop a new file"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="form-section-divider" />
+
+            <div className="form-section">
+              <div className="form-section-header">
+                <span className="form-section-number">02</span>
+                <span className="form-section-title">Title & author</span>
+              </div>
+              <div className="form-row">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="form-label">Title</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="ex: Rich Dad Poor Dad"
+                          className="form-input"
+                          autoComplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="author"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="form-label">Author Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="ex: Robert Kiyosaki"
+                          className="form-input"
+                          autoComplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="form-section-divider" />
+
+            <div className="form-section">
+              <div className="form-section-header">
+                <span className="form-section-number">03</span>
+                <span className="form-section-title">Choose a voice</span>
+              </div>
+              <FormItem>
+                <FormControl>
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-sm font-medium text-[#4A443B] mb-2.5">Male voices</p>
+                      <div className="voice-selector-options">
+                        {voiceCategories.male.map((vk) =>
+                          renderVoiceOption(vk as VoiceKey)
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[#4A443B] mb-2.5">Female voices</p>
+                      <div className="voice-selector-options">
+                        {voiceCategories.female.map((vk) =>
+                          renderVoiceOption(vk as VoiceKey)
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </div>
+
+            <button
+              type="submit"
+              className="form-btn disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.99]"
+              disabled={isSubmitting || form.formState.isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Synthesizing...
+                </span>
+              ) : (
+                'Begin Synthesis'
+              )}
+            </button>
+          </div>
         </form>
       </Form>
     </>

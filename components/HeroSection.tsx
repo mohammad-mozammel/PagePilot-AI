@@ -2,65 +2,90 @@ import Image from "next/image";
 import Link from "next/link";
 
 const steps = [
-  {
-    number: 1,
-    title: "Upload PDF",
-    description: "Add your book file",
-  },
-  {
-    number: 2,
-    title: "AI Processing",
-    description: "We analyze the content",
-  },
-  {
-    number: 3,
-    title: "Voice Chat",
-    description: "Discuss with AI",
-  },
+  { number: "01", title: "Upload PDF" },
+  { number: "02", title: "AI processes it" },
+  { number: "03", title: "Talk it through" },
 ];
 
-export default function HeroSection() {
+// Muted brand tones used to fill any stack slots that don't have a real cover yet.
+const FALLBACK_TONES = ["#5F7A57", "#B08D4F", "#A85850"];
+
+type StackBook = {
+  coverURL?: string;
+  title?: string;
+  coverColor?: string;
+};
+
+const STACK_LAYOUT = [
+  { left: "0%", top: "16%", rotate: "-9deg", z: 1 },
+  { left: "34%", top: "0%", rotate: "4deg", z: 2 },
+  { left: "68%", top: "10%", rotate: "-3deg", z: 1 },
+];
+
+export default function HeroSection({ books = [] }: { books?: StackBook[] }) {
+  const slots = STACK_LAYOUT.map((layout, i) => ({ layout, book: books[i] }));
+
   return (
-    <section className="container mx-auto">
-      <div className="library-hero-card">
-        <div className="library-hero-content">
-          {/* Left — heading, description, CTA */}
-          <div className="library-hero-text">
-            <h1 className="library-hero-title">Your Library</h1>
-            <p className="library-hero-description">
-              Convert your books into interactive AI conversations. Listen, learn, and discuss your
-              favorite reads.
-            </p>
-            <Link href="/books/new" className="library-cta-primary">
-              + Add new book
-            </Link>
-          </div>
+    <section className="hero-section">
+      {/* Left — eyebrow, headline, description, CTA, steps */}
+      <div>
+        <p className="hero-eyebrow">Voice-powered reading</p>
+        <h1 className="hero-title">
+          Read with your ears,
+          <br />
+          not just your eyes.
+        </h1>
+        <p className="hero-description">
+          Upload any PDF and have a real conversation about it — ask questions,
+          request summaries, hear it read aloud.
+        </p>
+        <Link href="/books/new" className="hero-cta">
+          Start reading
+        </Link>
 
-          {/* Center — vintage books illustration */}
-          <div className="library-hero-illustration">
-            <Image
-              src="/assets/hero-illustration.png"
-              alt="Vintage books, globe, and reading lamp"
-              width={420}
-              height={220}
-              className="h-auto w-full max-w-[340px] lg:max-w-[400px] object-contain"
-              priority
-            />
-          </div>
-
-          {/* Right — 3-step card */}
-          <div className="library-steps-card">
-            {steps.map((step) => (
-              <div key={step.number} className="library-step-item">
-                <span className="library-step-number">{step.number}</span>
-                <div>
-                  <p className="library-step-title">{step.title}</p>
-                  <p className="library-step-description">{step.description}</p>
-                </div>
+        <div className="hero-steps">
+          {steps.map((step, i) => (
+            <div key={step.number} className="flex items-center flex-1 last:flex-none">
+              <div className="hero-step">
+                <span className="hero-step-number">{step.number}</span>
+                <span className="hero-step-title">{step.title}</span>
               </div>
-            ))}
-          </div>
+              {i < steps.length - 1 && <div className="hero-step-line" />}
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* Right — a fanned stack of real (or fallback) book covers on a shelf line */}
+      <div className="hero-visual">
+        <div className="hero-stack">
+          {slots.map(({ layout, book }, i) => (
+            <div
+              key={i}
+              className="hero-stack-item"
+              style={{
+                left: layout.left,
+                top: layout.top,
+                transform: `rotate(${layout.rotate})`,
+                zIndex: layout.z,
+                width: "34%",
+                aspectRatio: "2 / 3",
+                backgroundColor: book?.coverColor || FALLBACK_TONES[i % FALLBACK_TONES.length],
+              }}
+            >
+              {book?.coverURL && (
+                <Image
+                  src={book.coverURL}
+                  alt={book.title ? `Cover of ${book.title}` : ""}
+                  fill
+                  sizes="120px"
+                  className="object-cover"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="hero-shelf-line" />
       </div>
     </section>
   );

@@ -1,7 +1,7 @@
 'use client'
 
 import useVapi, { CallStatus } from '@/hooks/useVapi'
-import { Mic, MicOff, X } from "lucide-react";
+import { Mic, MicOff, X, Volume2, Clock } from "lucide-react";
 import { IBook } from "@/types";
 import { formatDuration } from "@/lib/utils";
 import Image from "next/image";
@@ -18,7 +18,7 @@ const STATUS_CONFIG: Record<CallStatus, { label: string; dotClass: string }> = {
 
 const VapiControls = ({ book }: { book: IBook }) => {
 
-   const { status, isActive, messages, currentMessage, currentUserMessage, duration, start, stop, clearError, limitError, maxDurationSeconds, showTimeWarning } = useVapi(book)
+    const { status, isActive, messages, currentMessage, currentUserMessage, duration, start, stop, clearError, limitError, maxDurationSeconds, showTimeWarning } = useVapi(book)
 
     const { title, author, coverURL, persona } = book;
 
@@ -48,73 +48,74 @@ const VapiControls = ({ book }: { book: IBook }) => {
                 </div>
             )}
 
-            <section className="vapi-header-card">
-                <div className="vapi-cover-wrapper">
-                    <Image
-                        src={coverURL}
-                        alt={`Cover of ${title} by ${author}`}
-                        width={120}
-                        height={170}
-                        className="w-[120px] h-[170px] object-cover rounded-lg"
-                        style={{ boxShadow: "var(--shadow-book)" }}
-                        priority
-                    />
-                    <div className="vapi-mic-wrapper relative">
-                        {isActive && (status === 'speaking' || status === 'thinking') && (
-                            <div className="absolute inset-0 rounded-full bg-white animate-ping opacity-75" />
-                        )}
-                        <button
-                            onClick={isActive ? stop : start}
-                            disabled={status === 'connecting'}
-                            aria-label={isActive ? 'Stop voice conversation' : 'Start voice conversation'}
-                            className={`vapi-mic-btn shadow-md !w-[60px] !h-[60px] z-10 ${isActive ? 'vapi-mic-btn-active' : 'vapi-mic-btn-inactive'}`}
-                        >
-                            {isActive ? (
-                                <Mic className="size-7 text-[#212a3b]" />
-                            ) : (
-                                <MicOff className="size-7 text-[#212a3b]" />
+            <div className="reading-layout">
+                {/* Sticky left rail — cover, mic, and status */}
+                <aside className="reading-sidebar reading-sidebar-sticky">
+                    <div className="vapi-cover-wrapper mx-auto w-fit">
+                        <Image
+                            src={coverURL}
+                            alt={`Cover of ${title} by ${author}`}
+                            width={140}
+                            height={196}
+                            className="w-[140px] h-[196px] object-cover rounded-lg"
+                            style={{ boxShadow: "var(--shadow-book)" }}
+                            priority
+                        />
+                        <div className="vapi-mic-wrapper relative">
+                            {isActive && (status === 'speaking' || status === 'thinking') && (
+                                <div className="vapi-pulse-ring" />
                             )}
-                        </button>
+                            <button
+                                onClick={isActive ? stop : start}
+                                disabled={status === 'connecting'}
+                                aria-label={isActive ? 'Stop voice conversation' : 'Start voice conversation'}
+                                className={`vapi-mic-btn shadow-md !w-[52px] !h-[52px] z-10 ${isActive ? 'vapi-mic-btn-active' : 'vapi-mic-btn-inactive'}`}
+                            >
+                                {isActive ? (
+                                    <Mic className="size-6 text-[#1C1A17]" />
+                                ) : (
+                                    <MicOff className="size-6 text-[#1C1A17]" />
+                                )}
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">
+                    <h1 className="font-serif text-lg font-semibold text-[var(--text-primary)] text-center mt-7">
                         {title}
                     </h1>
-                    <p className="mt-1 text-[var(--text-secondary)]">by {author}</p>
+                    <p className="text-sm text-[var(--text-secondary)] text-center mt-0.5">{author}</p>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        <span className="vapi-status-indicator">
+                    <div className="reading-status-list">
+                        <div className="reading-status-row">
                             <span className={`vapi-status-dot ${STATUS_CONFIG[status].dotClass}`} aria-hidden="true" />
-                            <span className="vapi-status-text">
-                                <span key={STATUS_CONFIG[status].label} className="vapi-status-label">
-                                    {STATUS_CONFIG[status].label}
-                                </span>
+                            <span key={STATUS_CONFIG[status].label} className="vapi-status-label">
+                                {STATUS_CONFIG[status].label}
                             </span>
-                        </span>
-                        <span className="vapi-status-indicator">
-                            <span className="vapi-status-text">Voice: {persona || "Rachel"}</span>
-                        </span>
-                        <span className="vapi-status-indicator">
-                            <span className={`vapi-status-text vapi-timer ${showTimeWarning ? 'text-[#b45309]' : ''}`}>
+                        </div>
+                        <div className="reading-status-row">
+                            <Volume2 className="w-3.5 h-3.5 text-[var(--text-muted)]" aria-hidden="true" />
+                            <span>Voice: {persona || "Rachel"}</span>
+                        </div>
+                        <div className="reading-status-row">
+                            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" aria-hidden="true" />
+                            <span className={`vapi-timer ${showTimeWarning ? 'text-[#A6461E]' : ''}`}>
                                 {formatDuration(duration)}
                                 {maxDurationSeconds > 0 && `/${formatDuration(maxDurationSeconds)}`}
                                 {showTimeWarning && ' · time left'}
                             </span>
-                        </span>
+                        </div>
                     </div>
+                </aside>
+
+                {/* Chat-style transcript */}
+                <div className="reading-main">
+                    <Transcript
+                        messages={messages}
+                        currentMessage={currentMessage}
+                        currentUserMessage={currentUserMessage}
+                    />
                 </div>
-            </section>
-
-
-            <section className="vapi-transcript-wrapper">
-                <Transcript
-                    messages={messages}
-                    currentMessage={currentMessage}
-                    currentUserMessage={currentUserMessage}
-                />
-            </section>
+            </div>
         </>
     )
 }

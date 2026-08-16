@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Serif, Mona_Sans } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import "./globals.css";
 import Navbar from "@/components/Navbar"
 import { Toaster } from "sonner";
 
-const ibmPlexSerif = IBM_Plex_Serif({
-  variable: "--font-ibm-plex-serif",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
   weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   display: 'swap'
 });
 
-const monaSans = Mona_Sans({
-  variable: "--font-mona-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: 'swap'
 });
 
 export const metadata: Metadata = {
@@ -28,10 +30,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: '#7A2E2C',
+          colorPrimaryForeground: '#FFFDF8',
+          colorForeground: '#1C1A17',
+          colorBackground: '#FFFDF8',
+          colorMuted: '#EDE4D3',
+          colorMutedForeground: '#4A443B',
+          colorInput: '#FFFDF8',
+          colorInputForeground: '#1C1A17',
+          colorNeutral: '#1C1A17',
+          borderRadius: '0.75rem',
+          fontFamily: 'var(--font-inter)',
+        },
+      }}
+    >
       <html lang="en">
         <body
-          className={`${ibmPlexSerif.variable} ${monaSans.variable} relative antialiased`}
+          className={`${fraunces.variable} ${inter.variable} relative antialiased`}
           suppressHydrationWarning
         >
           <Navbar />

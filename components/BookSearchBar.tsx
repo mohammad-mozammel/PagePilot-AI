@@ -6,12 +6,12 @@ import { Search } from 'lucide-react'
 
 const DEBOUNCE_MS = 350
 
-const BookSearchBar = ({ initialQuery = '' }: { initialQuery?: string }) => {
+const BookSearchBar = ({ initialQuery }: { initialQuery?: string }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
 
     const currentQuery = searchParams.get('search') ?? ''
-    const [query, setQuery] = useState(initialQuery)
+    const [query, setQuery] = useState(initialQuery ?? currentQuery)
     const [prevQuery, setPrevQuery] = useState(currentQuery)
     const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -58,7 +58,7 @@ const BookSearchBar = ({ initialQuery = '' }: { initialQuery?: string }) => {
 
     return (
         <form className="library-search-wrapper" role="search" onSubmit={handleSubmit}>
-            <Search className="ml-3 w-4 h-4 text-[var(--text-muted)] shrink-0" aria-hidden="true" />
+            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" aria-hidden="true" />
             <input
                 type="search"
                 value={query}
@@ -67,7 +67,7 @@ const BookSearchBar = ({ initialQuery = '' }: { initialQuery?: string }) => {
                     setQuery(value)
                     updateSearch(value)
                 }}
-                placeholder="Search books by title or author..."
+                placeholder="Search your library"
                 className="library-search-input"
                 aria-label="Search books"
             />
