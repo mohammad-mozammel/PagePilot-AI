@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import "./globals.css";
@@ -20,12 +20,31 @@ const inter = Inter({
   display: 'swap'
 });
 
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ['400', '500'],
+  display: 'swap'
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "PagePilot AI",
+    default: "PagePilot AI — Your voice-powered reading companion",
     template: "%s | PagePilot AI",
   },
-  description: "PagePilot AI helps you read, understand, and remember more. Upload PDFs, chat with AI, generate summaries, and explore books through voice-powered conversations."
+  description: "Upload any PDF and have a real conversation with it. Ask questions, request summaries, or listen as your book is read aloud by an AI voice companion.",
+  keywords: ["voice reading", "AI reading companion", "PDF to audiobook", "talk to books", "AI voice assistant", "book summaries"],
+  openGraph: {
+    title: "PagePilot AI — Your voice-powered reading companion",
+    description: "Upload any PDF and have a real conversation with it. Ask questions, request summaries, or listen as your book is read aloud.",
+    type: "website",
+    siteName: "PagePilot AI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PagePilot AI — Your voice-powered reading companion",
+    description: "Upload any PDF and have a real conversation with it.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -33,15 +52,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <ClerkProvider
       appearance={{
         variables: {
-          colorPrimary: '#7A2E2C',
-          colorPrimaryForeground: '#FFFDF8',
-          colorForeground: '#1C1A17',
-          colorBackground: '#FFFDF8',
-          colorMuted: '#EDE4D3',
-          colorMutedForeground: '#4A443B',
-          colorInput: '#FFFDF8',
-          colorInputForeground: '#1C1A17',
-          colorNeutral: '#1C1A17',
+          colorPrimary: '#E8A33D',
+          colorPrimaryForeground: '#231A07',
+          colorForeground: '#221D13',
+          colorBackground: '#F7F3E9',
+          colorMuted: '#EFE9D9',
+          colorMutedForeground: '#5C5545',
+          colorInput: '#FFFEF9',
+          colorNeutral: '#EFE9D9',
           borderRadius: '0.75rem',
           fontFamily: 'var(--font-inter)',
         },
@@ -49,14 +67,27 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <html lang="en">
         <body
-          className={`${fraunces.variable} ${inter.variable} relative antialiased`}
+          className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} relative antialiased`}
           suppressHydrationWarning
         >
+          <a href="#main-content" className="skip-link">
+            Skip to content
+          </a>
+
           <Navbar />
 
           {children}
 
-          <Toaster position="bottom-right" richColors />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: '#FFFEF9',
+                border: '1px solid rgba(34, 29, 19, 0.12)',
+                color: '#221D13',
+              },
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

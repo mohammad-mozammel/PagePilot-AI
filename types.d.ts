@@ -74,6 +74,7 @@ export interface BookCardProps {
     author: string;
     coverURL: string;
     slug: string;
+    persona?: string;
     variant?: 'grid' | 'featured' | 'shelf';
 }
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { getBookBySlug } from "@/lib/actions/book.actions";
 import VapiControls from "@/components/VapiControls";
 import BookSignInGate from "@/components/BookSignInGate";
@@ -19,6 +19,15 @@ const Page = async ({ params }: PageProps<"/books/[slug]">) => {
     return (
         <main className="book-page-container">
             <div className="mx-auto w-full max-w-5xl">
+                <nav className="reader-breadcrumb" aria-label="Breadcrumb">
+                    <Link href="/" className="reader-breadcrumb-link">
+                        <ArrowLeft className="size-4" aria-hidden="true" />
+                        Library
+                    </Link>
+                    <ChevronRight className="reader-crumb-sep size-3.5" aria-hidden="true" />
+                    <span className="truncate">{book.title}</span>
+                </nav>
+
                 {userId ? (
                     <VapiControls book={book} />
                 ) : (
@@ -30,10 +39,6 @@ const Page = async ({ params }: PageProps<"/books/[slug]">) => {
                     />
                 )}
             </div>
-
-            <Link href="/" className="back-btn-floating" aria-label="Back to library">
-                <ArrowLeft className="w-5 h-5 text-[var(--text-primary)]" />
-            </Link>
         </main>
     );
 };

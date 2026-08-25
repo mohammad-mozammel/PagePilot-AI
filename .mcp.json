@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "21st": {
+      "type": "http",
+      "url": "https://21st.dev/api/mcp",
+      "headers": {
+        "x-api-key": "21st_sk_64c8c563f5ccd97c09ca665b2fd48dc4df7537ae1463f13a4124b274b5d18d98"
+      }
+    },
+    "supabase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref",
+        "dlicoclflnhlwnladmsn"
+      ]
+    }
+  }
+}

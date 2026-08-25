@@ -180,12 +180,12 @@ const Dropzone: React.FC<DropzoneProps> = ({
         className={cn(
           'outline-none transition-all duration-200',
           className
-            ? cn(className, isDragOver && 'border-[#7A2E2C]')
+            ? cn(className, isDragOver && 'border-[var(--accent-warm)]')
             : cn(
               'upload-dropzone border-2 border-dashed',
-              file ? 'upload-dropzone-uploaded border-[#7A2E2C]/50' : 'border-[#B08D4F]/40',
-              isDragOver && 'scale-[1.01] border-[#7A2E2C] bg-[#FFFDF8] shadow-soft-md',
-              !file && !isDragOver && 'focus-visible:border-[#7A2E2C] focus-visible:ring-2 focus-visible:ring-[#7A2E2C]/20'
+              file ? 'upload-dropzone-uploaded border-[var(--accent-warm)]/50' : 'border-[var(--border-medium)]',
+              isDragOver && 'scale-[1.01] border-[var(--accent-warm)] bg-[var(--bg-elevated)] shadow-soft-md',
+              !file && !isDragOver && 'focus-visible:border-[var(--accent-warm)] focus-visible:ring-2 focus-visible:ring-[var(--accent-warm)]/20'
             )
         )}
       >
@@ -198,7 +198,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
               <span className="upload-dropzone-text font-semibold truncate max-w-[220px] sm:max-w-xs">
                 {file.name}
               </span>
-              <span className="text-xs font-medium text-[#B08D4F] bg-white/60 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-medium text-[var(--accent-warm)] bg-[var(--accent-glow)] px-2 py-0.5 rounded-md">
                 {formatFileSize(file.size)}
               </span>
               <span
@@ -220,7 +220,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
         ) : (
           <>
             {isDragOver ? (
-              <GripVertical className="upload-dropzone-icon animate-bounce text-[#7A2E2C]" />
+              <GripVertical className="upload-dropzone-icon animate-bounce text-[var(--accent-warm)]" />
             ) : (
               icon
             )}
@@ -455,7 +455,7 @@ const UploadForm = () => {
             <label
               className={cn(
                 'voice-selector-option flex-col sm:flex-col sm:items-start sm:justify-start text-left cursor-pointer select-none',
-                isSelected && 'voice-selector-option-selected ring-1 ring-[#7A2E2C]/30',
+                isSelected && 'voice-selector-option-selected ring-1 ring-[var(--accent-warm)]/30',
                 !isSelected && 'voice-selector-option-default'
               )}
             >
@@ -474,18 +474,18 @@ const UploadForm = () => {
                   className={cn(
                     'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-150 shrink-0',
                     isSelected
-                      ? 'border-[#7A2E2C] bg-[#7A2E2C]/5'
-                      : 'border-gray-300 bg-white'
+                      ? 'border-[var(--accent-warm)] bg-[var(--accent-glow)]'
+                      : 'border-[var(--border-medium)] bg-transparent'
                   )}
                 >
                   {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-[#7A2E2C] animate-in zoom-in-50 duration-150" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--accent-warm)] animate-in zoom-in-50 duration-150" />
                   )}
                 </span>
                 <span
                   className={cn(
                     'font-semibold text-base',
-                    isSelected ? 'text-[#7A2E2C]' : 'text-[#1C1A17]'
+                    isSelected ? 'text-[var(--accent-warm)]' : 'text-[var(--text-primary)]'
                   )}
                 >
                   {voice.name}
@@ -494,7 +494,7 @@ const UploadForm = () => {
               <span
                 className={cn(
                   'text-xs sm:text-sm pl-6 sm:pl-0 leading-snug',
-                  isSelected ? 'text-[#B08D4F]' : 'text-[#4A443B]'
+                  isSelected ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)]'
                 )}
               >
                 {voice.description}
@@ -517,6 +517,7 @@ const UploadForm = () => {
         >
           {/* Live preview — the cover itself doubles as the cover-image dropzone */}
           <aside className="newbook-sidebar">
+            <p className="preview-frame-caption ">Live preview</p>
             <FormField
               control={form.control}
               name="coverImage"
@@ -562,8 +563,8 @@ const UploadForm = () => {
                           </>
                         ) : (
                           <>
-                            <ImageIcon className="w-7 h-7 text-[#B08D4F]" />
-                            <span className="text-xs text-[#6B6355] px-4 leading-snug">
+                            <ImageIcon className="w-7 h-7 text-[var(--accent-warm)]" />
+                            <span className="text-xs text-[var(--text-muted)] px-4 leading-snug">
                               {pdfFile ? 'Auto-generated from your PDF — or add your own' : 'Click to add a cover'}
                             </span>
                           </>
@@ -587,13 +588,16 @@ const UploadForm = () => {
             )}
           </aside>
 
-          {/* Form sections */}
-          <div className="flex flex-col gap-8">
-            <div className="form-section">
-              <div className="form-section-header">
-                <span className="form-section-number">01</span>
-                <span className="form-section-title">Upload your book</span>
-              </div>
+          {/* Form panels */}
+          <div className="flex flex-col gap-5">
+            <section className="form-panel">
+              <header className="form-panel-head">
+                <span className="form-panel-num">01</span>
+                <div>
+                  <h2 className="form-panel-title">Source</h2>
+                  <p className="form-panel-sub">PDF up to 50MB — text is extracted automatically</p>
+                </div>
+              </header>
               <FormField
                 control={form.control}
                 name="pdfFile"
@@ -617,15 +621,16 @@ const UploadForm = () => {
                   </FormItem>
                 )}
               />
-            </div>
+            </section>
 
-            <div className="form-section-divider" />
-
-            <div className="form-section">
-              <div className="form-section-header">
-                <span className="form-section-number">02</span>
-                <span className="form-section-title">Title & author</span>
-              </div>
+            <section className="form-panel">
+              <header className="form-panel-head">
+                <span className="form-panel-num">02</span>
+                <div>
+                  <h2 className="form-panel-title">Details</h2>
+                  <p className="form-panel-sub">How the book appears in your library</p>
+                </div>
+              </header>
               <div className="form-row">
                 <FormField
                   control={form.control}
@@ -666,20 +671,21 @@ const UploadForm = () => {
                   )}
                 />
               </div>
-            </div>
+            </section>
 
-            <div className="form-section-divider" />
-
-            <div className="form-section">
-              <div className="form-section-header">
-                <span className="form-section-number">03</span>
-                <span className="form-section-title">Choose a voice</span>
-              </div>
+            <section className="form-panel">
+              <header className="form-panel-head">
+                <span className="form-panel-num">03</span>
+                <div>
+                  <h2 className="form-panel-title">Narrator</h2>
+                  <p className="form-panel-sub">The voice that reads and answers — you can hear it in session</p>
+                </div>
+              </header>
               <FormItem>
                 <FormControl>
                   <div className="space-y-5">
                     <div>
-                      <p className="text-sm font-medium text-[#4A443B] mb-2.5">Male voices</p>
+                      <p className="text-sm font-medium text-[var(--text-secondary)] mb-2.5">Male voices</p>
                       <div className="voice-selector-options">
                         {voiceCategories.male.map((vk) =>
                           renderVoiceOption(vk as VoiceKey)
@@ -687,7 +693,7 @@ const UploadForm = () => {
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-[#4A443B] mb-2.5">Female voices</p>
+                      <p className="text-sm font-medium text-[var(--text-secondary)] mb-2.5">Female voices</p>
                       <div className="voice-selector-options">
                         {voiceCategories.female.map((vk) =>
                           renderVoiceOption(vk as VoiceKey)
@@ -698,22 +704,25 @@ const UploadForm = () => {
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            </div>
+            </section>
 
-            <button
-              type="submit"
-              className="form-btn disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.99]"
-              disabled={isSubmitting || form.formState.isSubmitting}
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Synthesizing...
-                </span>
-              ) : (
-                'Begin Synthesis'
-              )}
-            </button>
+            <div>
+              <button
+                type="submit"
+                className="form-btn"
+                disabled={isSubmitting || form.formState.isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-5 h-5 border-2 border-[#231a07]/30 border-t-[#231a07] rounded-full animate-spin" />
+                    Preparing your book...
+                  </span>
+                ) : (
+                  'Make it talk'
+                )}
+              </button>
+              <p className="submit-note">Takes about a minute · Free plan includes 1 book</p>
+            </div>
           </div>
         </form>
       </Form>

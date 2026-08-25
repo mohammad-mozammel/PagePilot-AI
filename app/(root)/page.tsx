@@ -1,5 +1,13 @@
 import Link from "next/link";
 import HeroSection from "@/components/HeroSection";
+import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
+import Marquee from "@/components/home/Marquee";
+import HowItWorks from "@/components/home/HowItWorks";
+import BentoFeatures from "@/components/home/BentoFeatures";
+import PricingTeaser from "@/components/home/PricingTeaser";
+import Faq from "@/components/home/Faq";
+import CtaBand from "@/components/home/CtaBand";
 import { getAllBooks } from "@/lib/actions/book.actions";
 import { BookOpen, Library } from "lucide-react";
 import BookCard from "@/components/BookCard";
@@ -16,72 +24,115 @@ const Page = async ({ searchParams }: PageProps<"/">) => {
     const isSearching = query.length > 0
 
     // getAllBooks already sorts by most recent first, so the first few are
-    // naturally the "continue reading" set and the rest fill out the shelf.
+    // naturally the "continue listening" set and the rest fill out the shelf.
     const featuredBooks = isSearching ? [] : books.slice(0, 3)
     const shelfBooks = isSearching ? [] : books.slice(3)
 
     return (
-        <main className="wrapper container">
-            {!isSearching && (
-                <HeroSection
-                    books={featuredBooks.map((b) => ({ coverURL: b.coverURL, title: b.title, coverColor: b.coverColor }))}
-                />
-            )}
+        <>
+            <main id="main-content" className="wrapper container">
+                {!isSearching && <HeroSection />}
 
-            <div className="library-toolbar">
-                <h2 className="library-toolbar-title">{isSearching ? `Results for "${query}"` : "Your library"}</h2>
-            </div>
+                {/* Library — sits right under the hero so books are seen first */}
+                <section className={!isSearching ? 'mt-14 md:mt-20' : ''} aria-label="Your library">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 md:mb-10">
+                        <div className="flex flex-col gap-3">
+                            {!isSearching && (
+                                <p className="studio-label"><span className="studio-label-dot" aria-hidden="true" />Your library</p>
+                            )}
+                            <h2 className="library-toolbar-title">
+                                {isSearching ? `Results for “${query}”` : 'Pick up where you left off'}
+                            </h2>
+                        </div>
 
-            {showEmptyState ? (
-                <div className="library-empty-card">
-                    <div className="library-empty-icon">
-                        <Library className="w-8 h-8" />
+                        <div className="flex items-center gap-4 shrink-0 pb-1">
+                            {books.length > 0 && (
+                                <span className="lib-count">
+                                    {books.length} {books.length === 1 ? 'book' : 'books'}
+                                </span>
+                            )}
+                            {!isSearching && (
+                                <Link href="/books/new" className="btn-secondary !py-2 !px-4 text-sm">
+                                    <BookOpen className="size-4" aria-hidden="true" />
+                                    Add a book
+                                </Link>
+                            )}
+                        </div>
                     </div>
-                    <p className="library-empty-title">
-                        {isSearching ? "No books found" : "Your library is empty"}
-                    </p>
-                    <p className="library-empty-hint">
-                        {isSearching
-                            ? `No books match "${query}". Try a different search or clear the filter.`
-                            : "Upload your first PDF and turn it into an interactive voice conversation."}
-                    </p>
-                    <Link href="/books/new" className="btn-primary">
-                        <BookOpen className="w-4 h-4" />
-                        Add a book
-                    </Link>
-                </div>
-            ) : isSearching ? (
-                <div className="library-books-grid">
-                    {books.map((book) => (
-                        <BookCard key={book._id} title={book.title} author={book.author} coverURL={book.coverURL} slug={book.slug} coverColor={book.coverColor} />
-                    ))}
-                </div>
-            ) : (
-                <>
-                    {featuredBooks.length > 0 && (
-                        <>
-                            <p className="library-subheading">Continue reading</p>
-                            <div className="featured-row">
-                                {featuredBooks.map((book) => (
-                                    <BookCard key={book._id} variant="featured" title={book.title} author={book.author} coverURL={book.coverURL} slug={book.slug} coverColor={book.coverColor} />
-                                ))}
-                            </div>
-                        </>
-                    )}
 
-                    {shelfBooks.length > 0 && (
-                        <>
-                            <p className="library-subheading">Rest of your shelf</p>
-                            <div className="shelf-grid">
-                                {shelfBooks.map((book) => (
-                                    <BookCard key={book._id} variant="shelf" title={book.title} author={book.author} coverURL={book.coverURL} slug={book.slug} coverColor={book.coverColor} />
-                                ))}
+                    {showEmptyState ? (
+                        <Reveal className="library-empty-card">
+                            <div className="library-empty-icon">
+                                <Library className="w-7 h-7" />
                             </div>
+                            <p className="library-empty-title">
+                                {isSearching ? "No books found" : "Your library is empty"}
+                            </p>
+                            <p className="library-empty-hint">
+                                {isSearching
+                                    ? `No books match "${query}". Try a different search or clear the filter.`
+                                    : "Upload a PDF and start talking with it — questions, summaries, read-aloud."}
+                            </p>
+                            <Link href="/books/new" className="btn-primary mt-2">
+                                <BookOpen className="w-4 h-4" />
+                                Add your first book
+                            </Link>
+                        </Reveal>
+                    ) : (
+                        <>
+                            {featuredBooks.length > 0 && (
+                                <>
+                                    <p className="library-subheading">Continue listening</p>
+                                    <Reveal stagger className="featured-row">
+                                        {featuredBooks.map((book) => (
+                                            <BookCard key={book._id} variant="featured" title={book.title} author={book.author} coverURL={book.coverURL} slug={book.slug} coverColor={book.coverColor} persona={book.persona} />
+                                        ))}
+                                    </Reveal>
+                                </>
+                            )}
+
+                            {(shelfBooks.length > 0 || isSearching) && (
+                                <>
+                                    {!isSearching && shelfBooks.length > 0 && (
+                                        <p className="library-subheading">On the shelf</p>
+                                    )}
+                                    <Reveal stagger className={isSearching ? 'library-books-grid' : 'shelf-grid'}>
+                                        {(isSearching ? books : shelfBooks).map((book) => (
+                                            <BookCard key={book._id} title={book.title} author={book.author} coverURL={book.coverURL} slug={book.slug} coverColor={book.coverColor} />
+                                        ))}
+                                    </Reveal>
+                                </>
+                            )}
                         </>
                     )}
-                </>
-            )}
-        </main>
+                </section>
+
+                {/* Story sections */}
+                {!isSearching && (
+                    <>
+                        <Marquee />
+                        <HowItWorks />
+                        <BentoFeatures />
+
+                        {/* Manifesto */}
+                        <Reveal className="manifesto-band">
+                            <p className="studio-label justify-center"><span className="studio-label-dot" aria-hidden="true" />Why we built this</p>
+                            <blockquote className="manifesto-quote">
+                                “Every book deserves a{' '}
+                                <em className="italic text-[var(--accent-text)]">voice</em> — and every
+                                reader deserves more time.”
+                            </blockquote>
+                        </Reveal>
+
+                        <PricingTeaser />
+                        <Faq />
+                        <CtaBand />
+                    </>
+                )}
+            </main>
+
+            <Footer />
+        </>
     );
 }
 

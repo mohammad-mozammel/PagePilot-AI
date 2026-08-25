@@ -12,17 +12,17 @@ interface LoadingOverlayProps {
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   isLoading,
-  title = 'Processing your book...',
-  steps = ['Uploading PDF', 'Extracting content', 'Generating synthesis', 'Preparing interview'],
+  title = 'Preparing your book...',
+  steps = ['Uploading your PDF', 'Extracting the text', 'Indexing chapters', 'Warming up the voice'],
   currentStep = 0,
 }) => {
   if (!isLoading) return null
 
   return (
-    <div className="loading-wrapper">
-      <div className="loading-shadow-wrapper bg-white">
+    <div className="loading-wrapper" role="status" aria-live="polite">
+      <div className="loading-shadow-wrapper">
         <div className="loading-shadow">
-          <Loader2 className="loading-animation w-12 h-12 text-[#7A2E2C]" />
+          <Loader2 className="loading-animation w-10 h-10" />
           <h3 className="loading-title">{title}</h3>
           <div className="loading-progress">
             {steps.map((step, index) => (
@@ -33,14 +33,14 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
                       ? 'w-2 h-2 bg-[var(--success)] rounded-full'
                       : index === currentStep
                       ? 'loading-progress-status'
-                      : 'w-2 h-2 bg-gray-300 rounded-full'
+                      : 'w-2 h-2 bg-[var(--bg-secondary)] rounded-full'
                   }
                 />
                 <span
                   className={
                     index <= currentStep
                       ? 'text-[var(--text-primary)] font-medium'
-                      : 'text-gray-400'
+                      : 'text-[var(--text-muted)]'
                   }
                 >
                   {step}

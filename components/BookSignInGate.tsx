@@ -55,6 +55,7 @@ const BookSignInGate = ({ title, author, coverURL, redirectUrl }: BookSignInGate
             >
                 Sign in to continue
             </button>
+            <p className="text-xs text-[var(--text-muted)]">Your library stays synced across devices.</p>
         </div>
     )
 }

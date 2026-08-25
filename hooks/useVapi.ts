@@ -62,6 +62,10 @@ export function useVapi(book: IBook) {
     const maxDurationSecondsRef = useRef(0);
     const planLimitSecondsRef = useRef(0);
     const vapiReadyRef = useRef(false);
+    // Live audio level (0-1) from Vapi's volume-level events. Stored in a ref
+    // (not state) because these events fire dozens of times per second and
+    // consumers animate via requestAnimationFrame instead of re-renders.
+    const volumeRef = useRef(0);
     const durationRef = useLatestRef(duration);
     const voice = book.persona || DEFAULT_VOICE;
 
@@ -150,6 +154,12 @@ export function useVapi(book: IBook) {
                     // After AI finishes speaking, user can talk
                     setStatus('listening');
                 }
+            },
+
+            'volume-level': (level: number) => {
+                volumeRef.current = typeof level === 'number' && Number.isFinite(level)
+                    ? Math.min(1, Math.max(0, level))
+                    : 0;
             },
 
             message: (message: {
@@ -279,10 +289,11 @@ export function useVapi(book: IBook) {
             maxDurationSecondsRef.current = limitSeconds;
             setMaxDurationSeconds(limitSeconds);
 
-            const firstMessage = `Hey, good to meet you. Quick question before we dive in - have you actually read ${book.title} yet, or are we starting fresh?`;
+            const firstMessage = `Hey, good to meet you. Before we dive in — honest question: have you actually read ${book.title}, or are we starting fresh together?`;
 
             await getVapi().start(ASSISTANT_ID, {
                 firstMessage,
+                firstMessageMode: 'assistant-speaks-first',
                 variableValues: {
                     title: book.title,
                     author: book.author,
@@ -339,6 +350,7 @@ export function useVapi(book: IBook) {
         maxDurationSeconds,
         remainingSeconds,
         showTimeWarning,
+        volumeRef,
     };
 }
 
