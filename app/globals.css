@@ -100,7 +100,7 @@
   --card-foreground: #221d13;
   --popover: #fffef9;
   --popover-foreground: #221d13;
-  --primary: #e8a33d;
+  --primary: rgb(232, 163, 61);
   --primary-foreground: #231a07;
   --secondary: #efe9d9;
   --secondary-foreground: #221d13;
@@ -1399,8 +1399,7 @@
     @apply flex items-center gap-3.5;
   }
   .session-mock-cover {
-    @apply relative flex h-[58px] w-[40px] shrink-0 items-end justify-center rounded-[4px] pb-1.5 ring-1 ring-black/10;
-    background: linear-gradient(150deg, #f0b055, #b57f27);
+    @apply relative block h-[58px] w-[40px] shrink-0 overflow-hidden rounded-[4px] ring-1 ring-black/10 border border-amber-200;
     box-shadow: var(--shadow-book);
   }
   .session-mock-chip {

@@ -2,7 +2,6 @@ import Link from "next/link";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
-import Marquee from "@/components/home/Marquee";
 import HowItWorks from "@/components/home/HowItWorks";
 import BentoFeatures from "@/components/home/BentoFeatures";
 import PricingTeaser from "@/components/home/PricingTeaser";
@@ -32,7 +31,7 @@ const Page = async ({ searchParams }: PageProps<"/">) => {
         <>
             <main id="main-content" className="wrapper container">
                 {!isSearching && <HeroSection />}
-
+               
                 {/* Library — sits right under the hero so books are seen first */}
                 <section className={!isSearching ? 'mt-14 md:mt-20' : ''} aria-label="Your library">
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 md:mb-10">
@@ -110,7 +109,7 @@ const Page = async ({ searchParams }: PageProps<"/">) => {
                 {/* Story sections */}
                 {!isSearching && (
                     <>
-                        <Marquee />
+
                         <HowItWorks />
                         <BentoFeatures />
 

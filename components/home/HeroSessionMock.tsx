@@ -1,6 +1,9 @@
-import { BookOpen, Mic } from 'lucide-react'
+import Image from "next/image";
+import { Mic } from 'lucide-react'
 
 // Decorative product preview — a frozen PagePilot voice session.
+const MOCK_COVER_URL =
+    'https://xre0b3beuotbfimr.public.blob.vercel-storage.com/atomic_habits_cover-Qms33lgIwSFaTVnO2Mw3i0bQg5aTFv.png'
 const EQ_BARS = [
     { h: 40, d: '-0.9s', dur: '1.05s' },
     { h: 75, d: '-0.5s', dur: '1.2s' },
@@ -24,8 +27,15 @@ const HeroSessionMock = () => {
 
             <div className="session-mock-body">
                 <div className="session-mock-book">
-                    <span className="session-mock-cover">
-                        <BookOpen className="h-3.5 w-3.5 text-[#231a07]" />
+                    <span className="session-mock-cover !block overflow-hidden">
+                        <Image
+                            src={MOCK_COVER_URL}
+                            alt=""
+                            fill
+                            sizes="40px"
+                            className="object-cover"
+                            priority
+                        />
                     </span>
                     <span>
                         <span className="block font-serif text-sm font-semibold text-[var(--text-primary)]">
